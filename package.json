@@ -1,0 +1,66 @@
+{
+  "name": "camera-watermark",
+  "version": "3.0.0",
+  "description": "Camera-WaterMark - offline photo watermark tool",
+  "author": "shiraijikuu",
+  "license": "MIT",
+  "homepage": "https://github.com/shiraijikuu/camera-watermark",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shiraijikuu/camera-watermark.git"
+  },
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win --x64",
+    "build:win-portable": "electron-builder --win portable --x64"
+  },
+  "devDependencies": {
+    "electron": "^31.3.1",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.shiraijikuu.cwm",
+    "productName": "Camera-WaterMark",
+    "files": [
+      "index.html",
+      "presets/**/*",
+      "main.js",
+      "cwm-logo.png",
+      "cwm.ico",
+      "!node_modules/**/*"
+    ],
+    "directories": {
+      "output": "release"
+    },
+    "win": {
+      "sign": null,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "cwm.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.5.0",
+    "@capacitor/browser": "^8.0.4",
+    "@capacitor/cli": "^7.6.8",
+    "@capacitor/core": "^8.5.0"
+  }
+}

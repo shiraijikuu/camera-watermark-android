@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Android / Gradle build output
+android/.gradle/
+android/build/
+android/app/build/
+android/capacitor-cordova-android-plugins/build/
+android/local.properties
+
+# Signing secrets —— 严禁提交签名私钥与密码（丢失=任何人可冒充你的应用更新）
+*.jks
+*.keystore
+android/keystore.properties
+
+# Logs / OS
+*.log
+.DS_Store
+Thumbs.db
