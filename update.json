@@ -1,0 +1,11 @@
+{
+  "version": "3.0",
+  "coreVersion": "3.0",
+  "shellVersion": "3.0.0",
+  "releaseDate": "2026-09-01",
+  "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
+  "notes": {
+    "zh": "Camera-WaterMark 3.0（安卓）：离线 EXIF、文字/图片/模糊卡片水印、品牌标与参数框预设、8 套主题、导出直存相册。",
+    "en": "Camera-WaterMark 3.0 (Android): offline EXIF, text / image / blur-card watermarks, brand-logo & badge presets, 8 themes, export to gallery."
+  }
+}

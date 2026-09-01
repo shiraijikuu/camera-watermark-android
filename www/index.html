@@ -367,8 +367,13 @@ body.sliding .sheet,body.sliding #rightPane{opacity:.4}
     <div class="phone-only-export" style="margin-top:10px;gap:8px">
       <button class="toolbtn primary" id="btnExportM" style="flex:1" data-i18n="export">导出当前</button>
     </div>
-    <div class="phone-only-export" style="margin-top:8px">
+    <div class="phone-only-export" style="margin-top:8px;gap:8px;align-items:center">
+      <label data-i18n="language" style="white-space:nowrap">语言</label>
+      <select class="toolsel" id="langSelM" style="flex:1"><option value="zh">简体中文</option><option value="en">English</option></select>
+    </div>
+    <div class="phone-only-export" style="margin-top:8px;gap:8px">
       <button class="toolbtn" id="btnAboutM" style="flex:1" data-i18n="about">关于</button>
+      <button class="toolbtn" id="btnCheckUpdateM" style="flex:1" data-i18n="checkUpdate">检查更新</button>
     </div>
     </div>
     </div>
@@ -405,7 +410,7 @@ if(!CanvasRenderingContext2D.prototype.roundRect){CanvasRenderingContext2D.proto
  this.moveTo(x+r.tl,y);this.arcTo(x+w,y,x+w,y+h,r.tr);this.arcTo(x+w,y+h,x,y+h,r.br);this.arcTo(x,y+h,x,y,r.bl);this.arcTo(x,y,x+w,y,r.tl);this.closePath();return this;};}
 
 /* ================= i18n ================= */
-const I18N={zh:{tagline:'照片水印工具',tplLib:'模板库',about:'关于',export:'导出当前',phoneView:'手机形态',backDesktop:'返回桌面',
+const I18N={zh:{tagline:'照片水印工具',tplLib:'模板库',about:'关于',checkUpdate:'检查更新',language:'语言',export:'导出当前',phoneView:'手机形态',backDesktop:'返回桌面',
  photos:'照片',import:'导入照片',fit:'适',dropHint:'拖入照片 · 滚轮缩放 · 拖空白平移 · 拖水印改位置',dropHintTouch:'单指拖空白平移 · 双指捏合缩放 · 拖文字水印改位置',collapse:'收起',
  g_style:'水印样式',tab_style:'样式',tab_param:'参数',tab_export:'导出',tab_edit:'编辑',nb_text:'水印文字',nb_style:'样式',nb_image:'图片水印',nb_pos:'位置',nb_deco:'装饰',nb_export:'导出',selAll:'全选',selNone:'全不选',compare:'对比原图',listHead:'文件名 / 相机 · 参数',style_text:'文字水印',style_blur:'模糊卡片',g_text:'文字内容',tplPreset:'模板预设',camOverride:'机型覆盖',
  g_font:'字体 / 文字',fontFamily:'字体',loadFont:'加载',textColor:'颜色',bold:'加粗',g_pos:'位置（可在预览上拖动）',
@@ -413,7 +418,7 @@ const I18N={zh:{tagline:'照片水印工具',tplLib:'模板库',about:'关于',e
  g_blur:'模糊卡片',b_ratio:'画面比例',b_layout:'排版布局',b_shadow:'前景阴影',b_outline:'前景描边',b_badge:'参数标签框',b_overlay:'叠加图片水印',b_order:'字段模板',b_align:'参数对齐',
  g_image:'图片水印（1-5 个，可叠加）',img_enable:'启用图片水印',img_count:'数量',img_align:'水印1对齐',
  g_export:'导出',ex_format:'格式',ex_suffix:'文件名后缀',ex_ratio:'导出比例',ex_batch:'批量导出全部'},
-en:{tagline:'Photo Watermark',tplLib:'Templates',about:'About',export:'Export',phoneView:'Phone',backDesktop:'Desktop',
+en:{tagline:'Photo Watermark',tplLib:'Templates',about:'About',checkUpdate:'Update',language:'Language',export:'Export',phoneView:'Phone',backDesktop:'Desktop',
  photos:'Photos',import:'Import',fit:'Fit',dropHint:'Drop photos · wheel zoom · drag bg to pan · drag watermark',dropHintTouch:'1-finger pan · pinch to zoom · drag watermark',collapse:'Close',
  g_style:'Style',tab_style:'Style',tab_param:'Params',tab_export:'Export',tab_edit:'Edit',nb_text:'Text',nb_style:'Style',nb_image:'Image',nb_pos:'Position',nb_deco:'Decor',nb_export:'Export',selAll:'All',selNone:'None',compare:'Compare',listHead:'Name / Camera · Params',style_text:'Text',style_blur:'Blur card',g_text:'Text content',tplPreset:'Preset',camOverride:'Override camera',
  g_font:'Font / Text',fontFamily:'Font',loadFont:'Load',textColor:'Color',bold:'Bold',g_pos:'Position (draggable)',
@@ -434,7 +439,7 @@ function setTheme(key){document.documentElement.dataset.theme=resolveTheme(key);
 /* ================= 状态（对齐 Python DEFAULT_SETTINGS + 插件） ================= */
 const DEF_TPL='{make}  {model}\n{focal}  {aperture}  {shutter}  {iso}';
 const APP_VERSION='3.0';
-const UPDATE_URL='https://cdn.jsdelivr.net/gh/shiraijikuu/camera-watermark@main/app/update.json';
+const UPDATE_URL='https://cdn.jsdelivr.net/gh/shiraijikuu/camera-watermark-android@main/update.json';
 const state={
  style:'text', template:DEF_TPL, cameraOverride:'',
  fields:{make:true,model:true,focal:true,aperture:true,shutter:true,iso:true},
@@ -1234,13 +1239,16 @@ function aboutHTML(){
 function openAbout(){openModal(L('关于 Camera-WaterMark','About Camera-WaterMark'),aboutHTML());}
 const _ba=document.getElementById('btnAbout');if(_ba)_ba.onclick=openAbout;
 const _baM=document.getElementById('btnAboutM');if(_baM)_baM.onclick=openAbout;
+const _cuM=document.getElementById('btnCheckUpdateM');if(_cuM)_cuM.onclick=()=>checkUpdate(false);
 
 /* ================= 主题 / 语言 / 手机形态 ================= */
 const themeSel=document.getElementById('themeSel');
 function fillTheme(){themeSel.innerHTML='';THEME_ORDER.forEach(k=>{const o=el('option');o.value=k;o.textContent=(THEME_LABEL[LANG]||THEME_LABEL.zh)[k];themeSel.append(o);});themeSel.value=state.theme;setTheme(state.theme);}
 themeSel.onchange=()=>{state.theme=themeSel.value;setTheme(state.theme);};
 if(window.matchMedia)window.matchMedia('(prefers-color-scheme: dark)').addEventListener&&window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{if(state.theme==='auto')setTheme('auto');});
-document.getElementById('langSel').onchange=e=>{LANG=e.target.value;applyI18n();buildControls();bindStaticRepaint();fillTheme();mainEl.dataset.over=L('松开导入照片','Drop to import');scheduleRender();};
+function setLang(v){LANG=v;const _a=document.getElementById('langSel'),_b=document.getElementById('langSelM');if(_a)_a.value=v;if(_b)_b.value=v;applyI18n();buildControls();bindStaticRepaint();fillTheme();const _at=document.querySelector('.tab.active');if(_at){const _k=_at.dataset.sheet,_st=document.getElementById('sheetTitle');if(_st)_st.textContent=_k==='export'?L('导出','Export'):L('编辑参数','Edit');}mainEl.dataset.over=L('松开导入照片','Drop to import');scheduleRender();}
+document.getElementById('langSel').onchange=e=>setLang(e.target.value);
+const _lmSel=document.getElementById('langSelM');if(_lmSel)_lmSel.onchange=e=>setLang(e.target.value);
 function bindStaticRepaint(){ // 语言切换后重建的控件值回写
  document.getElementById('tplInput').value=state.template;document.getElementById('camOverride').value=state.cameraOverride;
  document.getElementById('exFormat').value=state.format;document.getElementById('exSuffix').value=state.suffix;refreshGroups();}
@@ -1292,12 +1300,10 @@ async function checkUpdate(silent){
   if(!remote)throw new Error('no version');
   const cmp=(a,b)=>{const pa=a.split('.').map(Number),pb=b.split('.').map(Number);for(let i=0;i<3;i++){if((pa[i]||0)>(pb[i]||0))return 1;if((pa[i]||0)<(pb[i]||0))return -1;}return 0;};
   if(cmp(remote,APP_VERSION)>0){
-   const ua=navigator.userAgent||'';const native=window.Capacitor&&(window.Capacitor.isNativePlatform?window.Capacitor.isNativePlatform():false);
-   const dl=(native||/Android|iPhone|iPad|iPod|Mobile/i.test(ua))?(j.download_android||j.download_url):(j.download_windows||j.download_url);
-   const url=dl||j.url||'https://github.com/shiraijikuu/camera-watermark/releases';
+   const url=j.download_url||j.url||'https://github.com/shiraijikuu/camera-watermark/releases';
    showModal(L('发现新版本 v'+remote,'New version v'+remote),
     L('当前版本 v'+APP_VERSION+'，最新版本 v'+remote+'。\n\n是否前往下载？','Current v'+APP_VERSION+', latest v'+remote+'.\n\nGo to download?'),
-    [{text:L('稍后','Later'),cls:''},{text:L('下载','Download'),cls:'primary',onclick:()=>{window.open(url,'_blank');}}]);
+    [{text:L('稍后','Later'),cls:''},{text:L('下载','Download'),cls:'primary',onclick:()=>{openExternal(url);}}]);
   }else if(!silent){
    showModal(L('已是最新','Up to date'),L('当前版本 v'+APP_VERSION+' 已是最新版本。','Current v'+APP_VERSION+' is the latest.'),[{text:L('确定','OK'),cls:'primary'}]);
   }

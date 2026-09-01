@@ -486,3 +486,34 @@ $env:JAVA_HOME="E:\jdk21\jdk-21.0.12.1+1"; $env:ANDROID_HOME="E:\sdk"; $env:ANDR
 ### 21.4 注意
 - 新 applicationId 对系统而言是“新应用”：手机上若装过旧 com.shiraijiku.cwm 的 debug 包，需先卸载再装，无法覆盖升级（未发布、无用户，无影响）。
 - 签名 keystore 不变（签名与包名相互独立），仍是 cwm-release.jks / alias cwm。
+
+---
+
+## 22. 修复：手机形态补上「检查更新」入口
+
+### 22.1 根因
+手机形态 CSS `body.phone .statusbar{display:none}` 隐藏了底部状态栏，而「检查更新」按钮原本只存在于状态栏，导致手机端无入口；checkUpdate() 逻辑本身通用、手机可跑。
+
+### 22.2 改动（仅 index.html）
+- I18N zh/en 新增 checkUpdate 词条（检查更新 / Update）。
+- 手机导出 sheet（.phone-only-export）在「关于」旁并排新增 btnCheckUpdateM，绑定 checkUpdate(false)。
+- checkUpdate 更新弹窗的「下载」由 window.open 改为 openExternal(url)：手机走 @capacitor/browser 系统浏览器打开 Releases，桌面仍由 main.js 转系统浏览器。
+
+### 22.3 验证
+Electron 无头手机形态：按钮存在且 .phone-only-export display=flex；stub fetch 返回 9.9.9 后点击弹出「发现新版本」，点下载 openExternal 收到 releases URL；桌面状态栏 btnCheckUpdate 仍在；零控制台错误。clean assembleRelease/assembleDebug 成功，包名 com.shiraijikuu.cwm、签名 v1+v2 通过，四份内核哈希一致（42ab62b3）。凭证：E:/codex/手机导出页-检查更新入口.png。
+
+---
+
+## 23. 修复：手机形态补上「语言切换」入口 + 切换时刷新 sheet 标题
+
+### 23.1 根因
+语言下拉 langSel 只在底部状态栏，手机形态状态栏 display:none，导致手机无法切换语言；另外 sheet 标题 sheetTitle 在打开 sheet 时按当时语言一次性赋值，切语言后不会重刷（无 data-i18n）。
+
+### 23.2 改动（仅 index.html）
+- I18N zh/en 新增 language 词条（语言 / Language）。
+- 抽出 setLang(v)：桌面 langSel 与手机 langSelM 共用，双向回写两个下拉的选中值，再统一 applyI18n/buildControls/bindStaticRepaint/fillTheme/scheduleRender。
+- 手机导出 sheet 新增 langSelM（简体中文 / English）。
+- setLang 末尾：若底部 sheet 处于打开状态，按当前激活 tab 重设 sheetTitle（导出/Export、编辑参数/Edit），修掉切语言后标题仍是旧语言。
+
+### 23.3 验证
+Electron 无头手机形态：两个下拉初始 zh 且手机端可见；手机切 en 后 LANG=en、桌面下拉同步 en、About/Update 等全部联动、sheetTitle=Export；桌面切回 zh 后手机下拉同步 zh、文本回中文；零控制台错误。assembleRelease/assembleDebug 成功，包名 com.shiraijikuu.cwm、签名通过。凭证：E:/codex/手机语言切换-英文界面.png。
