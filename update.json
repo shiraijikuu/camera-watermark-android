@@ -1,9 +1,9 @@
 {
   "version": "3.0",
-  "build": 4,
+  "build": 5,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
-  "releaseDate": "2026-09-03",
+  "releaseDate": "2026-09-04",
   "downloads": {
     "android": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
     "windows": "https://github.com/shiraijikuu/camera-watermark-windows/releases/latest",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "新增 20 款画框模板与品牌标；修复拍摄日期解析、PWA 安卓导入与电脑导出；支持同版本修订更新检测。",
-    "en": "Add 20 photo-frame templates and brand logos; fix date parsing, PWA import on Android and export on desktop; add same-build revision update detection."
+    "zh": "新增社交图标与画框模板修复；顶部可一键打开抖音/哔哩哔哩；同版本修订更新检测（build 5）。",
+    "en": "Add social icons & frame-template fixes; one-tap links to Douyin/Bilibili; same-version revision update detection (build 5)."
   }
 }

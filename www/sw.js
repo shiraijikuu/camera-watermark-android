@@ -2,7 +2,7 @@
  * 策略：页面(导航) network-first → 离线回退缓存，保证发布新版即时生效；
  *       同源静态资源 cache-first，首次访问后离线可用；跨域与 update.json 不拦截。
  * 发版时若改动静态资源，把下面 CACHE 版本号 +1 即可。 */
-const CACHE = 'cwm-pwa-v3.0.4';
+const CACHE = 'cwm-pwa-v3.0.6';
 const CORE = [
   './manifest.json',
   'icons/icon-192.png',
