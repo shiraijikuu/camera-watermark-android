@@ -614,3 +614,27 @@ sw.js 缓存名 cwm-pwa-v3.0 → cwm-pwa-v3.0.1（七份源 sw.js 同步；andro
 6. **下拉分组修正**：FRAME_CATS 第三项曾误写成 ['品牌风','brand']（key/名反了），导致徕卡/富士/哈苏没进下拉（只显示 17 项），改回 ['brand','品牌风']，现在 20 项、5 组（4/3/3/7/3）。
 7. **信息栏留白**：三行 center 模板底部 inset 统一到 ≥0.135、两行 split ≥0.11，避免横图时第三行日期被裁（filmstrip .09→.14、minwhite/pureblack/hasselblad/contact→.135、magazine→.11）。
 - 验证：横图 20 款 + 调整款 + 竖图、frame 双图片水印叠加、text/blur 回归均零 console error；fmtDT 五种输入单测通过；下拉 20 项分组正确。
+
+## 27. 同版本更新检测 + PWA 导入/导出修复（内核 sha256 前缀 2c6b58c95627255f，sw=v3.0.4，versionCode=4）
+### 27.1 解决的问题
+1. **检查更新永远"已是最新"**：两个叠加根因——① UPDATE_URL 原指向主仓库 camera-watermark@main/update.json，那是 Python 旧版 v2.0.0 的清单，v3.0 App 读到 2.0.0 必判最新；② v3 内核原先只比语义版本号，同版本重打包不提示。
+2. **PWA 在安卓无法导入图片**：`<input type=file hidden>`（hidden=display:none）在安卓 PWA 独立窗口 / 部分 WebView 里 `.click()` 不弹选择器。
+3. **PWA 在电脑无法导出**：browserDownload 原先只要 `navigator.canShare` 存在就优先系统分享，桌面浏览器 canShare({files}) 误判/分享失败后直接 resolve，不回落下载，导致点导出没反应。
+### 27.2 代码改动（仅 3 个局部，未动渲染/交互/UI）
+- `const APP_VERSION='3.0';` 旁新增 `const APP_BUILD=4;`；`UPDATE_URL` 改为 `https://cdn.jsdelivr.net/gh/shiraijikuu/camera-watermark-android@main/update.json`。
+- `checkUpdate()`：读取清单 `build`，判定 = 远端版本更高（新版本）**或** 版本相同但 `build>APP_BUILD`（同版本修订）；下载地址按 UA 从 `downloads.android/windows/pwa` 取，兜底 download_url/url；两种更新弹窗文案不同；兼容无 build 的旧清单（视为 0，不误报）。
+- 三个文件选择框（主导入 #fileInput、槽位图片、添加字体）把 `hidden` 改为视觉隐藏但可激活的内联样式 `position:fixed;left:-9999px;...;opacity:0`，业务 onchange 逻辑不变。
+- `browserDownload()`：仅 iOS（iPhone/iPad/iPod，含 iPadOS 桌面 UA=MacIntel+触屏）优先 navigator.share 存相册；Windows/Mac/Android 一律 `a[download]` 直接下载；share 任何异常都回落下载。
+- android `app/build.gradle` versionCode 3→4（两个安卓工程同步），versionName 仍 "3.0"。
+### 27.3 ★发版规则（以后每次发布必须遵守，否则同版本检测失效）
+- 两个号一起升：语义版本 `APP_VERSION`（用户可见）+ 单调构建号 `APP_BUILD`；**即使版本号不变，只要重新发布，APP_BUILD 必须 +1，且安卓 versionCode 同步 +1**（两者保持相等）。
+- 同时更新仓库 `camera-watermark-android` 根目录 `main` 分支的 `update.json`：`version` 与 APP_VERSION 一致、`build` 与本次 APP_BUILD 一致、`downloads` 三平台地址、`notes.zh/en`（**必须 UTF-8 无 BOM 保存**，旧版曾被存成 GBK 导致中文乱码）。
+- 已装旧包检测逻辑：远端 version 更高→"新版本"；version 相等、build 更高→"修订更新"。因此"先发 update.json(build=N) 再发 build=N 的包"，上一个 build=N-1 的已装用户就会收到更新提示。jsDelivr 有缓存，发布后如不更新可 purge `https://purge.jsdelivr.net/gh/shiraijikuu/camera-watermark-android@main/update.json`。
+- update.json 模板见 E:/codex/camera-watermark-android/update.json（本次已修为正确 UTF-8、build=4、分平台下载）。
+### 27.4 验证（Electron 无头，零 console error）
+- 语法 2 内联块 0 错误；APP_VERSION/APP_BUILD=3.0/4、UPDATE_URL 已指向安卓仓库、#fileInput 无 hidden。
+- checkUpdate 四态：{3.1}→发现新版本；{3.0,build9}→发现修订更新 build9；{3.0,build4}→已是最新；{2.0.0 旧 Python 清单}→已是最新（不误报）；fetch 异常→检查失败。
+- browserDownload：Windows 桌面 UA 下 how=download、创建并点击一次下载锚点、iOS 正则 false（不再走分享）。
+### 27.5 产物
+- Camera-WaterMark-3.0-release/debug.apk（versionCode=4 / versionName 3.0）、Setup/Portable exe、camera-watermark-pwa-v3.0.zip（sw=v3.0.4）；七处内核哈希一致 2c6b58c95627255f。
+- 注意：同版本检测能力是本次才进内核的，更早装的、没有 APP_BUILD 逻辑的旧 3.0 包无法靠该机制提示，需要用户手动下一次；之后所有版本都具备。

@@ -1,11 +1,17 @@
 {
   "version": "3.0",
+  "build": 4,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
-  "releaseDate": "2026-09-01",
+  "releaseDate": "2026-09-03",
+  "downloads": {
+    "android": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
+    "windows": "https://github.com/shiraijikuu/camera-watermark-windows/releases/latest",
+    "pwa": "https://github.com/shiraijikuu/camera-watermark-pwa/releases/latest"
+  },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "Camera-WaterMark 3.0（安卓）：离线 EXIF、文字/图片/模糊卡片水印、品牌标与参数框预设、8 套主题、导出直存相册。",
-    "en": "Camera-WaterMark 3.0 (Android): offline EXIF, text / image / blur-card watermarks, brand-logo & badge presets, 8 themes, export to gallery."
+    "zh": "新增 20 款画框模板与品牌标；修复拍摄日期解析、PWA 安卓导入与电脑导出；支持同版本修订更新检测。",
+    "en": "Add 20 photo-frame templates and brand logos; fix date parsing, PWA import on Android and export on desktop; add same-build revision update detection."
   }
 }
