@@ -517,3 +517,100 @@ Electron 无头手机形态：按钮存在且 .phone-only-export display=flex；
 
 ### 23.3 验证
 Electron 无头手机形态：两个下拉初始 zh 且手机端可见；手机切 en 后 LANG=en、桌面下拉同步 en、About/Update 等全部联动、sheetTitle=Export；桌面切回 zh 后手机下拉同步 zh、文本回中文；零控制台错误。assembleRelease/assembleDebug 成功，包名 com.shiraijikuu.cwm、签名通过。凭证：E:/codex/手机语言切换-英文界面.png。
+
+---
+
+## 24. PWA 化（iPhone/iPad 免 Mac、免账号、免审核可用）
+
+### 24.1 目标与结论
+同一套 HTML 内核改造为可安装 PWA：部署到任意 HTTPS（推荐 GitHub Pages）后，iPhone 用 Safari「添加到主屏幕」即可全屏、带图标、离线运行，无需 Mac/Apple 开发者账号/上架。不能上 App Store、存图需在分享面板点「存储图像」是其固有边界。
+
+### 24.2 新增文件
+- manifest.json：name Camera-WaterMark / short_name CWM / display standalone / 相对路径 start_url、scope（子目录部署可用）/ 192、512、maskable 图标 / theme、background #16171f。
+- sw.js（Service Worker）：CACHE=cwm-pwa-v3.0；导航请求 network-first（保证发版即时生效、离线回退缓存），同源静态资源 cache-first 并动态缓存（首次访问后 presets 也离线可用）；跨域与 update.json 不拦截；改静态资源时把 CACHE 版本号 +1。
+- icons/：icon-192、icon-512、icon-maskable-512、apple-touch-icon(180)，由 cwm-logo.png 经离屏 Canvas 高质量缩放生成（www/icons 与根 icons 各一份）。
+
+### 24.3 index.html 改动
+- <head>：link manifest、theme-color、mobile/apple-mobile-web-app-capable、apple-mobile-web-app-status-bar-style=black-translucent、apple-mobile-web-app-title=CWM、apple-touch-icon、favicon。
+- 初始化处条件注册 SW：仅当 !isNativeApp() 且 location.protocol 为 http(s) 时 navigator.serviceWorker.register("sw.js")；原生 Capacitor/Electron 与 file:// 不注册（原生已离线，避免 SW 缓存旧内核）。
+- browserDownload 增加 iOS 兜底：navigator.canShare({files}) 为真时用 navigator.share 分享导出文件（iOS 在分享面板选「存储图像」入相册），取消分享不报错；不支持时维持原 a[download] 下载。exportOne 非原生分支按 share / share-cancel / download 给不同提示。
+
+### 24.4 验证
+本地 Node 静态服务(www, :8799) + Electron 以 http 加载：navigator.serviceWorker 注册成功、scope 正确、reload 后 controller=true、active.state=activated；缓存 cwm-pwa-v3.0 含 index/manifest/icons 并动态缓存 presets；manifest 解析 name/short/display/icons=3；head 各 PWA 标签就位；零控制台错误。
+
+### 24.5 交付与发布
+- 整站目录 E:/codex/camera-watermark-pwa（约 9.7MB，45 文件，= www），直接推 GitHub Pages；步骤见 E:/codex/PWA部署与iOS使用说明.md。
+- 访问地址形如 https://shiraijikuu.github.io/<repo>/；iPhone 必须用 Safari 添加到主屏幕；导出走系统分享「存储图像」。
+- 本次内核变更已同步并重打 Android APK（包名 com.shiraijikuu.cwm、签名通过）与 Windows exe；四份内核 + PWA 站哈希一致。
+
+### 24.6 未来做原生 iOS 的增量（供参考，本次未做）
+PWA 与原生共用 index.html；原生只需 npx cap add ios（须 macOS+Xcode）、补 Swift 版相册保存插件（PHPhotoLibrary，对应 Android 的 GallerySaverPlugin）、Info.plist 相册权限文案、iOS 图标/启动屏，@capacitor/browser 已有 iOS 实现。
+
+
+---
+
+## 25. 启动动效 Splash（融合方案⑤，三端统一）
+### 25.1 效果
+冷启动显示全屏启动层：cwm 图标弹性入场 + 外圈光环旋转一圈 + 柔光呼吸 + 名字淡入 + 底部进度条由空填满；光环与进度条严格同步 1.4s，填满后定格 0.18s，再整体柔和淡出 0.45s 进入主界面。方案对比/选型预览保留在 E:/codex/camera-watermark-pwa/splash-preview.html。
+### 25.2 改动文件（唯一内核 index.html，七处副本哈希一致 4a620aa9bcb5e59d）
+- CSS：在 </style> 前新增 #cwmSplash 覆盖层样式与 6 个关键帧，动画名统一 sp- 前缀（spBounce/spBreathe/spSpin/spFill/spFade/spOut），避免与既有 appIn/phoneIn 冲突；只用 transform/opacity（GPU 合成，不重排）。
+- DOM：<body> 第一个元素插入 #cwmSplash（.sp-beam；.sp-stage>.sp-halo+.sp-ring+img.sp-logo[cwm-logo.png]；.sp-word；.sp-bar>i）。
+- JS：在 bindStatic();buildControls();fillTheme();applyI18n(); 之后插入 IIFE：监听 .sp-bar i 的 animationend 触发进入，并用 1400ms 定时器兜底（once 防重复）；进入时序=180ms 定格 → 加 .sp-out（spOut .45s forwards）→ 460ms 后 display:none。
+- 无障碍：@media (prefers-reduced-motion:reduce) 将动画压到 0.01ms，改由 1400ms 定时进入。
+- 图标复用各端已有 cwm-logo.png（与顶栏同源，256），不新增图片资源。
+### 25.3 PWA
+sw.js 缓存名 cwm-pwa-v3.0 → cwm-pwa-v3.0.1（七份源 sw.js 同步；android build/intermediates 由下次打包自动重新生成）。Electron/Capacitor 原生端不注册 SW，故 app.asar 内没有 sw.js 属正常。
+### 25.4 验证
+- Electron 无头：初始 #cwmSplash display=flex / z-index 9999、logo(256) 加载成功、主界面 52 个控件仍在；样式表规则 spSpin/spFill 均 1.4s 一次 forwards、spOut .45s；约 2s 后 display=none；零业务错误（仅开发期 CSP 警告，打包后消失）。
+- APK：aapt 包名 com.shiraijikuu.cwm / versionCode 3 / versionName 3.0 / label Camera-WaterMark；apksigner v1+v2 = true；APK 内 assets/public/index.html sha256=4a620aa9bcb5e59d、sw=v3.0.1。
+- Windows：app.asar 内 index.html sha256=4a620aa9bcb5e59d，#cwmSplash / @keyframes spFill / 启动 IIFE 均在。
+### 25.5 本次重打包产物（E:/codex，均已覆盖为最新）
+- Camera-WaterMark-3.0-release.apk（12.83MB，正式签名）、Camera-WaterMark-3.0-debug.apk（13.77MB）
+- Camera-WaterMark-3.0.0-Setup.exe（83.43MB）、Camera-WaterMark-3.0.0-Portable.exe（83.13MB）
+- camera-watermark-pwa/ 整站与 camera-watermark-pwa-v3.0.zip（9.36MB）
+### 25.6 调参位置（改节奏时这几处必须一起改）
+.sp-ring 与 .sp-bar i 的 1.4s（保持一致才同步）；IIFE 内 1400 兜底、180 定格；.sp-out 的 .45s 与 IIFE 内 460。
+
+## 26. v3.0 画框模板库（frame，第三种水印样式）
+### 26.1 目标与形态
+借鉴 Painting Box（13 款）/ semi-utils / PicSeal，并补充拍立得、复古、马卡龙、磨砂等网络流行风格，新增「画框模板」一整套**出图画框/边框**能力。它与既有「文字水印 text」「模糊卡片 blur」并列，是 state.style 的第三个取值 `frame`：照片按比例 contain 进一个更大的画布，四周留白/黑边/相纸，信息（型号/镜头/参数/日期/品牌 logo）印在留白区，装饰（齿孔、对位标、CMYK、PROOF 章、徕卡红线、富士绿标、相册三角夹）按模板叠加。预览与导出仍走同一 `renderTo`，天然所见即所得；桌面/安卓/PWA 三端同源。
+
+### 26.2 实现位置（全部在唯一内核 index.html，无新增文件、无第三方依赖）
+- 常量 `FRAME_CATS`（5 分类）与 `FRAMES`（20 款数据驱动定义）；核心函数：`getFrame / frameOutSize / frameGeometry / frameLogo / frameDrawPhoto / drawFrameInfo / drawFrameDecor / drawFrame`。
+- state 新增：`frameTpl:'classic', frameLogo, frameModel, frameParams, frameLens(默认false), frameDate`（均为布尔，除 frameTpl）。
+- 几何接入：`computeOut()` 开头 frame 分支用 `frameOutSize(sw,sh,t)`（照片区=原图，画布=照片/(1-两侧 inset)）；`renderTo()` 新增 `else if(state.style==='frame') drawFrame(...)`；图片水印叠加条件改为仅 text（及 blur 的 overlay）模式，frame 不叠加散点图片水印。
+- UI：样式页 `#styleSeg` 新增第三个分段按钮「画框模板」；新增 `#grpFrame`（模板下拉 `#frameTpl` 用 optgroup 分 5 类 + 品牌标/型号/拍摄参数/镜头/日期 5 个勾选）；`buildFrameSelect()` 构建（已在 buildControls 内调用，故 setLang 切语言会自动重建）；`refreshGroups()` 用 hideSide=blur||frame 统一控制位置/装饰页签与分组显隐。
+- i18n：I18N.zh/en 各加 style_frame/g_frame/f_tpl/f_logo/f_model/f_params/f_lens/f_date；模板自身中英文名在 FRAMES 的 zh/en 字段。
+
+### 26.3 20 款模板（id｜分类｜要点）
+- 经典底栏 bar：classic 经典底栏（居中 logo+型号+参数）、magazine 杂志双栏（左品牌右参数）、minwhite 纯白留白、minimal 极简角标（右下小字）
+- 电影黑边 letter：cinematic 电影黑边、scope 宽银幕 2.35:1（contentRatio 固定，照片裁宽银幕）、pureblack 纯黑极简
+- 品牌风 brand：leica 徕卡风（顶部红线+中竖红线）、fuji 富士经典（米白底+绿标 CLASSIC）、hasselblad 哈苏（黑底橙口音、onlyCam 只留型号）
+- 胶片相纸 film：polaroid 拍立得（底部宽白边）、vintage 复古胶片（泛黄）、pastel 马卡龙粉（圆角+阴影）、album 旧相册（米色+四角三角夹）、filmstrip 胶片齿孔（**左右竖齿孔** sprocketLR，文字在底部黑带）、contact 接触印样（**上下横齿孔** sprocketTB+白衬底）、darkroom 暗房样片（黑相纸+米白相纸+PROOF 红章）
+- 专业流行 pro：cropmarks 印刷标记（四角 L 对位标+CMYK 色块）、frosted 磨砂玻璃（blur 背景+圆角主体+半透明信息条 chip）、datestamp 日期纪念（subOnly:'date'，只显橙色日期）
+- 数据字段含义：bg 画布色（'blur'=模糊背景）、inset{t,b,l,r} 照片外留白占整画布比例、dark 深底（浅字+白 logo）、mat{color,out} 照片衬底、photo{round,shadow}、bar{place: center/split/corner/none, chip}、accent/dateAccent 强调色、decor 装饰器列表、contentRatio/onlyCam/subOnly 特殊开关。**新增第 21 款只需往 FRAMES 加一条数据；需要新装饰再在 drawFrameDecor 加分支。**
+
+### 26.4 logo 配色（重要）
+深底模板用内置白色品牌标（makeLogoCanvas，presets/*_w.png）；浅底模板走 frameLogo() 尝试原色 `*_t.png`，**当前 presets 目录只有白标、没有原色文件，浅底会安全回退成文字品牌名**（不报错）。若以后补齐 *_t.png 原色 logo，浅底模板会自动显示图形 logo，无需改逻辑。
+
+### 26.5 验证（Electron 无头，零 console error）
+- 横图 1200×800：20 款全部 renderExport 成功、尺寸=照片+外扩合理；竖图 800×1200 抽测 8 款正常，型号友好化生效（23049RAD8C→Redmi Note 12 Turbo）。
+- 回归：text/blur/frame 三模式均可渲染；#styleSeg 三按钮、#frameTpl 20 option、5 勾选齐全；frame 时位置/装饰页签隐藏、#grpFrame 显示，切回 text 恢复；中英 i18n 键齐全。
+- 修复过程：split 布局镜头行曾漏传 y 参数导致镜头跑到顶部（已修，型号主行在上、镜头次行在下）；胶片齿孔由错误的上下横排改为 filmstrip 左右竖排、contact 上下横排；datestamp 只突出日期。
+- 三端内核 sha256 前缀 = e67871926ab1f589（七处副本一致）；APK assets/public/index.html、app.asar index.html 均为此哈希；sw.js 缓存名升 cwm-pwa-v3.0.2（七份；asar 无 sw.js 属正常）。
+
+### 26.6 本次重打包产物（E:/codex，已覆盖最新）
+- Camera-WaterMark-3.0-release.apk（12.83MB）、Camera-WaterMark-3.0-debug.apk（13.80MB）
+- Camera-WaterMark-3.0.0-Setup.exe（83.43MB）、Camera-WaterMark-3.0.0-Portable.exe（83.13MB）
+- camera-watermark-pwa/ 与 camera-watermark-pwa-v3.0.zip（9.37MB，sw=v3.0.2）
+- 版本号沿用 3.0 / package.json 3.0.0 / versionCode 3（本次为同版本内功能新增，未升版本号；若要正式发布建议升 3.1.0，属次版本新增功能）。
+
+### 26.7 二次修订（真机反馈后，内核 sha256 前缀 37afbb9ae1d5c0a4，sw=v3.0.3）
+1. **日期显示修复（全局，影响 text/blur/frame）**：exifr.parse 默认 parseDates=true，返回的是 Date 对象，旧 fmtDT 只按字符串切分，会把时间错误显示成 "Thu / Sep"。fmtDT 重写为兼容 Date 对象 / `YYYY:MM:DD HH:MM:SS` / ISO / 无秒，统一输出 `YYYY-MM-DD` + `HH:MM`。
+2. **所有画框模板都显示品牌标**：presets 只有白标 `*_w.png`、无原色 `*_t`，新增 `tintLogo(brand,color)`——取白标用 globalCompositeOperation='source-in' 实时染成该模板主文字色（深底染浅、浅底染深），按 品牌@颜色 缓存；删除原先找 `_t` 文件的路径。
+3. **补齐信息**：hasselblad 去掉 onlyCam（现在显示参数）；datestamp 改为「型号 / 参数 / 橙色日期」三行（不再只剩日期）；album 旧相册、darkroom 暗房样片、contact 接触印样原本 place:'none' 纯装饰，现都加 center 信息栏（contact 改为仅顶部齿孔 sprocketT 腾出底部；darkroom 的 PROOF 章移到照片内左下角，不再与底部文字冲突）。
+4. **印刷标记 cropmarks 不再重叠**：CMYK 四色块与型号合并为底部左侧单行（不再画第二行镜头去撞色块），右侧参数、日期次行；四角 L 对位标保留。
+5. **画框模式可叠加图片水印**：renderTo 叠加条件由「text 或 blur-overlay」放宽为「text / frame / blur-overlay」，在「图片水印」页签照常配置 1-5 槽位；坐标按整个画框画布百分比。
+6. **下拉分组修正**：FRAME_CATS 第三项曾误写成 ['品牌风','brand']（key/名反了），导致徕卡/富士/哈苏没进下拉（只显示 17 项），改回 ['brand','品牌风']，现在 20 项、5 组（4/3/3/7/3）。
+7. **信息栏留白**：三行 center 模板底部 inset 统一到 ≥0.135、两行 split ≥0.11，避免横图时第三行日期被裁（filmstrip .09→.14、minwhite/pureblack/hasselblad/contact→.135、magazine→.11）。
+- 验证：横图 20 款 + 调整款 + 竖图、frame 双图片水印叠加、text/blur 回归均零 console error；fmtDT 五种输入单测通过；下拉 20 项分组正确。
