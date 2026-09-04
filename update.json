@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "build": 5,
+  "build": 6,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
   "releaseDate": "2026-09-04",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "新增社交图标与画框模板修复；顶部可一键打开抖音/哔哩哔哩；同版本修订更新检测（build 5）。",
-    "en": "Add social icons & frame-template fixes; one-tap links to Douyin/Bilibili; same-version revision update detection (build 5)."
+    "zh": "修复宽银幕模板照片被压扁（改为等比裁切）；顶部新增 GitHub 图标；接触印样补齐上下齿孔；纯介质模板去除空白水印区；画框模式恢复导出比例实时预览（build 6）。",
+    "en": "Fix CinemaScope photo stretching (now proportional crop); add GitHub icon; restore contact-sheet sprockets on both edges; drop empty watermark band on pure-medium frames; bring back live export-ratio preview in frame mode (build 6)."
   }
 }
