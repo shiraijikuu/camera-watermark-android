@@ -1,9 +1,9 @@
 {
   "version": "3.0",
-  "build": 8,
+  "build": 11,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
-  "releaseDate": "2026-09-04",
+  "releaseDate": "2026-09-10",
   "downloads": {
     "android": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
     "windows": "https://github.com/shiraijikuu/camera-watermark-windows/releases/latest",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "修复宽银幕模板照片被压扁（改为等比裁切）；顶部新增 GitHub 图标；接触印样补齐上下齿孔；纯介质模板去除空白水印区；画框模式恢复导出比例实时预览（build 6）。",
-    "en": "Fix CinemaScope photo stretching (now proportional crop); add GitHub icon; restore contact-sheet sprockets on both edges; drop empty watermark band on pure-medium frames; bring back live export-ratio preview in frame mode (build 6)."
+    "zh": "文字模板变量按钮改为显示功能名称；修复系统分享图片二进制数据丢失；修复分享重定向并保留待导入缓存。",
+    "en": "Show functional labels for text-template variable buttons; preserve shared image binary data; fix share redirect and keep pending shared-file cache across updates."
   }
 }

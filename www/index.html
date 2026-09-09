@@ -3051,7 +3051,7 @@ function setTheme(key){document.documentElement.dataset.theme=resolveTheme(key);
 
 /* ================= 状态（对齐 Python DEFAULT_SETTINGS + 插件） ================= */
 const DEF_TPL='{make}  {model}\n{focal}  {aperture}  {shutter}  {iso}';
-const APP_VERSION='3.0';const APP_BUILD=10; // 单调递增：每次发版(含同版本修订)+1，与安卓 versionCode 对齐，用于同版本更新检测
+const APP_VERSION='3.0';const APP_BUILD=11; // 单调递增：每次发版(含同版本修订)+1，与安卓 versionCode 对齐，用于同版本更新检测
 const SOCIAL={douyin:'https://v.douyin.com/aySgkT0fxTQ/',bilibili:'https://b23.tv/yJr6O00',github:'https://github.com/shiraijikuu'}; // 顶部社交链接
 const UPDATE_URL='https://cdn.jsdelivr.net/gh/shiraijikuu/camera-watermark-android@main/update.json';
 const state={
@@ -7085,9 +7085,12 @@ async function _handleSharedFiles(){
   const resp=await cache.match('cwm-shared-files');
   if(resp){
    const arr=await resp.json();
-   cache.delete('cwm-shared-files');
+   await cache.delete('cwm-shared-files');
    for(const item of arr){
-    const file=new File([item.buf],item.name,{type:item.type});
+    const fileResp=await cache.match(item.key);
+    if(!fileResp)continue;
+    const file=new File([await fileResp.blob()],item.name,{type:item.type});
+    await cache.delete(item.key);
     await ingest(file);
    }
    if(arr.length>0){current=photos.length-1;buildList();scheduleRender();showToast(L('已导入 '+arr.length+' 张分享图片','Imported '+arr.length+' shared photos'));}
