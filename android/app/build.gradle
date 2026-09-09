@@ -15,13 +15,11 @@ configurations.all {
         }
     }
 }
-
 def keystorePropertiesFile = rootProject.file("keystore.properties")
 def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
     keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
 }
-
 android {
     namespace "com.shiraijikuu.cwm"
     signingConfigs {
@@ -39,7 +37,7 @@ android {
         applicationId "com.shiraijikuu.cwm"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 11
+        versionCode 12
         versionName "3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -85,3 +83,4 @@ try {
 } catch(Exception e) {
     logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
 }
+

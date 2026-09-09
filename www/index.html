@@ -3051,7 +3051,7 @@ function setTheme(key){document.documentElement.dataset.theme=resolveTheme(key);
 
 /* ================= 状态（对齐 Python DEFAULT_SETTINGS + 插件） ================= */
 const DEF_TPL='{make}  {model}\n{focal}  {aperture}  {shutter}  {iso}';
-const APP_VERSION='3.0';const APP_BUILD=11; // 单调递增：每次发版(含同版本修订)+1，与安卓 versionCode 对齐，用于同版本更新检测
+const APP_VERSION='3.0';const APP_BUILD=12; // 单调递增：每次发版(含同版本修订)+1，与安卓 versionCode 对齐，用于同版本更新检测
 const SOCIAL={douyin:'https://v.douyin.com/aySgkT0fxTQ/',bilibili:'https://b23.tv/yJr6O00',github:'https://github.com/shiraijikuu'}; // 顶部社交链接
 const UPDATE_URL='https://cdn.jsdelivr.net/gh/shiraijikuu/camera-watermark-android@main/update.json';
 const state={
@@ -6039,13 +6039,14 @@ function isFrameless(){return state.badgeOrder.includes('无框');}
 function drawBlurWM(c,W,H,ph,wm,L){
  const vals=buildValues(ph);const text=renderTemplate(state.template,vals);
  const side=['左参数','右参数','左右分离'].includes(L);
+ const badgeScale=clamp(state.badgeScale/100,0.5,2);
  const useBadge=state.badgeEnabled;const rows=useBadge?badgeRows(vals):[];
  const logoOrder=isLogoOrder();const logoBrand=logoOrder?brandToLogo(vals.make,vals.model):null;
  if(L==='左右分离'&&wm.length>=2){
-   if(logoOrder&&logoBrand){pasteLogoContain(c,logoBrand,inset(wm[0],0.10));}
-   else{const lt=leftBrandText(vals);if(lt)drawPlainText(c,lt,wm[0]);}
+   if(logoOrder&&logoBrand){pasteLogoContainScaled(c,logoBrand,wm[0],badgeScale);}
+   else{const lt=leftBrandText(vals);if(lt)drawPlainText(c,lt,wm[0],badgeScale);}
    if(rows.length)drawBadges(c,rows,wm[1],'',null,!isFrameless());
-   else if(text&&text.split('\n').length>=2){drawPlainText(c,text.split('\n').slice(1).join('\n'),wm[1]);}
+   else if(text&&text.split('\n').length>=2){drawPlainText(c,text.split('\n').slice(1).join('\n'),wm[1],badgeScale);}
    return;
  }
  let title=badgeTitle(vals),brand=null;
@@ -6062,6 +6063,11 @@ function pasteLogoContain(c,brand,area){
  const lg=makeLogoCanvas(brand);if(!lg)return;let[x0,y0,x1,y1]=area;const aw=Math.max(1,x1-x0),ah=Math.max(1,y1-y0);
  const s=Math.min(aw/lg.width,ah/lg.height),nw=lg.width*s,nh=lg.height*s;
  c.drawImage(lg,x0+(aw-nw)/2,y0+(ah-nh)/2,nw,nh);
+}
+function pasteLogoContainScaled(c,brand,area,scale){
+ const lg=makeLogoCanvas(brand);if(!lg)return;let[x0,y0,x1,y1]=area;const aw=Math.max(1,x1-x0),ah=Math.max(1,y1-y0),baseW=aw*0.8,baseH=ah*0.8,scl=clamp(scale||1,0.5,2);
+ const tw=Math.min(aw,baseW*scl),th=Math.min(ah,baseH*scl),s=Math.min(tw/lg.width,th/lg.height),nw=lg.width*s,nh=lg.height*s;
+ c.drawImage(lg,(x0+x1-nw)/2,(y0+y1-nh)/2,nw,nh);
 }
 /* badge 绘制（横宽条 / 竖块，标签框 or 无框；标签+数值同一中心线居中） */
 function drawBadges(c,rows,box,title,logoBrand,framed){
@@ -6137,9 +6143,9 @@ function drawBadges(c,rows,box,title,logoBrand,framed){
    }
  }
 }
-function drawPlainText(c,text,box){ // 块内居中普通文字（含手动空格/参数间距）
+function drawPlainText(c,text,box,extraScale){ // 块内居中普通文字（含手动空格/参数间距）
  let[left,top,right,bottom]=box;const padx=Math.max(8,(right-left)/16),maxW=right-left-2*padx,maxH=bottom-top-8;
- const lines=text.split('\n'),n=Math.max(1,lines.length),userScale=clamp(state.fontSizePct/2.4,0.5,2);
+ const lines=text.split('\n'),n=Math.max(1,lines.length),userScale=clamp(state.fontSizePct/2.4,0.5,2)*clamp(extraScale||1,0.5,2);
  let start=clamp(maxH/(1.4*n)*0.96*userScale,10,maxH*0.5);const[tr,tg,tb]=hexRgb(state.textColor),ta=255*state.textOpacity/100;
  for(let fs=Math.floor(start);fs>=10;fs--){c.font=(state.bold?'700 ':'')+' '+fs+'px '+fontStack();const lineH=fs*1.4;let ok=true,widths=[];
    for(const ln of lines){const w=c.measureText(ln).width;widths.push(w);if(w>maxW)ok=false;}
