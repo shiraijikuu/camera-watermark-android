@@ -1,9 +1,9 @@
 {
   "version": "3.0",
-  "build": 12,
+  "build": 17,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
-  "releaseDate": "2026-09-10",
+  "releaseDate": "2026-10-14",
   "downloads": {
     "android": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
     "windows": "https://github.com/shiraijikuu/camera-watermark-windows/releases/latest",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "文字模板变量按钮显示功能名称；修复系统分享图片数据与重定向；修复左右分离布局中品牌/参数大小不生效；同步三端内核。",
-    "en": "Show functional labels for template variables; fix shared-image data and redirect; fix badge size in split layout; sync the shared kernel across platforms."
+    "zh": "修复液态玻璃主题下下拉框（模板预设、画框模板、字体、比例等）展开后选项文字看不清的问题，统一为深字白底；同步三端内核（build 17）。",
+    "en": "Fixed unreadable dropdown options (presets, frame templates, fonts, ratios, etc.) on the liquid-glass theme — dropdowns now render dark text on a light background; core synced across all platforms (build 17)."
   }
 }
