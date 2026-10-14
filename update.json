@@ -1,6 +1,6 @@
 {
   "version": "3.0",
-  "build": 17,
+  "build": 18,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
   "releaseDate": "2026-10-14",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "修复液态玻璃主题下下拉框（模板预设、画框模板、字体、比例等）展开后选项文字看不清的问题，统一为深字白底；同步三端内核（build 17）。",
-    "en": "Fixed unreadable dropdown options (presets, frame templates, fonts, ratios, etc.) on the liquid-glass theme — dropdowns now render dark text on a light background; core synced across all platforms (build 17)."
+    "zh": "修复手机 / PWA 窄屏下导入照片后顶部工具栏（全选、全不选、对比、撤销/重做、重置）一行排不下、右侧按钮被裁掉的问题，现在一行完整显示、极窄屏可横向滑动；手机端隐藏桌面级 A/B 对比槽并使用触摸短文案，修正整行向右偏移数像素的问题；同步三端内核（build 18）。",
+    "en": "Fixed the phone/PWA top toolbar (Select all / None / Compare / Undo / Redo / Reset) overflowing and being clipped on narrow screens — it now fits on one row (horizontal scroll on very narrow screens); hid desktop-only A/B slots on phones with compact touch labels and fixed a few-px rightward shift of the whole row; core synced across all platforms (build 18)."
   }
 }
