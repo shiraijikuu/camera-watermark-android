@@ -1,9 +1,9 @@
 {
   "version": "3.0",
-  "build": 18,
+  "build": 19,
   "coreVersion": "3.0",
   "shellVersion": "3.0.0",
-  "releaseDate": "2026-10-14",
+  "releaseDate": "2026-10-15",
   "downloads": {
     "android": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
     "windows": "https://github.com/shiraijikuu/camera-watermark-windows/releases/latest",
@@ -11,7 +11,7 @@
   },
   "download_url": "https://github.com/shiraijikuu/camera-watermark-android/releases/latest",
   "notes": {
-    "zh": "修复手机 / PWA 窄屏下导入照片后顶部工具栏（全选、全不选、对比、撤销/重做、重置）一行排不下、右侧按钮被裁掉的问题，现在一行完整显示、极窄屏可横向滑动；手机端隐藏桌面级 A/B 对比槽并使用触摸短文案，修正整行向右偏移数像素的问题；同步三端内核（build 18）。",
-    "en": "Fixed the phone/PWA top toolbar (Select all / None / Compare / Undo / Redo / Reset) overflowing and being clipped on narrow screens — it now fits on one row (horizontal scroll on very narrow screens); hid desktop-only A/B slots on phones with compact touch labels and fixed a few-px rightward shift of the whole row; core synced across all platforms (build 18)."
+    "zh": "修复手机 / PWA 在更窄屏幕（360/320）或系统显示缩放较大时，顶部栏（主题选择、社交图标）与导入照片后的工具栏（全选、全不选等）被顶出屏幕的问题：手机端隐藏顶部社交外链、收缩主题下拉与工具栏按钮，现在 320 宽也能一行完整显示；PWA 新增新版本自动刷新，旧缓存用户下次打开即自动更新到最新版（build 19）。",
+    "en": "Fixed the phone/PWA header (theme picker/social icons) and the import toolbar (Select all/None/etc.) being pushed off-screen on very narrow (360/320) displays or enlarged system text scaling: social links are hidden on phones and the theme picker/toolbar buttons are compacted so everything fits on one row even at 320px; the PWA now auto-reloads once when a new version activates, so cached users update automatically on next open (build 19)."
   }
 }
